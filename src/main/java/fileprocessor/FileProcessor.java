@@ -3,6 +3,7 @@ package fileprocessor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -31,39 +32,43 @@ public class FileProcessor {
 	private static EventsDao eventsDao;
 	// private static File file;
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException, FileNotFoundException {
 
 		final File file = new File(
 				"C:\\Users\\sunny\\workspace\\fileprocessor\\src\\main\\java\\fileprocessor\\logfile.txt");
 		// promptUserForExistingFilePath();
+		FileInputStream fis = new FileInputStream(file);
+		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+		final BufferedReader br = new BufferedReader(isr);
 
 		Connection connection = DbConnection.getInstance().getConnection();
 		eventsDao = new EventsDao(connection);
 		eventsDao.createTableIfNotExist();
-
-		Thread fileProcessor = new Thread(new Runnable() {
+		
+		
+		//Producer Thread: loops through lines, if id of current line is not yet present on map, put it on the map
+		//otherwise update the existing object on map corresponding to the id
+		Thread readLinesUpdateMapThread = new Thread(new Runnable() {
 
 			public void run() {
 				try {
-					readFileUsingBufferedReader(file);
-				} catch (IOException e) {
-					Logger.error(e.getMessage());
-					e.printStackTrace();
-				} catch (InterruptedException e) {
+					readLinesUpdateMap(br, idToEventMap);
+				} catch (Exception e) {
 					Logger.error(e.getMessage());
 					e.printStackTrace();
 				}
-
 			}
 		});
-		fileProcessor.start();
+		readLinesUpdateMapThread.start();
 
-		Thread eventsMapProcessor = new Thread(new Runnable() {
+		//Consumer Thread: loops through map entries, checks for objects for which duration is calculated , 
+		//save such objects to database and remove them from map
+		Thread readMapUpdateDatabaseThread = new Thread(new Runnable() {
 
 			public void run() {
 				try {
 					while (true) {
-						Thread.sleep(1000);
+						Thread.sleep(500);
 						if (idToEventMap.size() > 0) {
 							processEvents(idToEventMap);
 						} else {
@@ -77,8 +82,8 @@ public class FileProcessor {
 
 						}
 					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+				} catch (Exception e) {
+					Logger.error(e.getMessage());
 					e.printStackTrace();
 				} finally {
 					try {
@@ -91,53 +96,24 @@ public class FileProcessor {
 
 			}
 		});
-		eventsMapProcessor.start();
-
-		// readFromDatabase();
+		readMapUpdateDatabaseThread.start();
 
 	}
 
-	public static LogEvent convertLineToEvent(String logLine) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		LogEvent logEvent = mapper.readValue(logLine, LogEvent.class);
-
-		return logEvent;
-
-	}
-
-	public static void readFileUsingBufferedReader(File file) throws IOException, InterruptedException {
-
-		FileInputStream fis = new FileInputStream(file);
-		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-		BufferedReader br = new BufferedReader(isr);
-
-		String line;
-		while ((line = br.readLine()) != null) {
-			Thread.sleep(1000);
-			// process the line
-			LogEvent logEvent = convertLineToEvent(line);
-			if (idToEventMap.containsKey(logEvent.getId())) {
-				Event event = idToEventMap.get(logEvent.getId());
-				setStartOrEndTimestamp(event, logEvent);
-				event.setDuration(event.getEndTimestamp() - event.getStartTimestamp());
-
-				idToEventMap.put(event.getId(), event);
-			} else {
-				Event event = new Event();
-				event.setId(logEvent.getId());
-
-				setStartOrEndTimestamp(event, logEvent);
-
-				event.setHost(logEvent.getHost());
-				event.setType(logEvent.getType());
-
-				idToEventMap.put(event.getId(), event);
+	private static void readLinesUpdateMap(BufferedReader br, Map<String, Event> idToEventMap)
+			throws IOException, InterruptedException {
+		if (br != null) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				Thread.sleep(500);
+				LogEvent logEvent = convertLogLineToEvent(line);
+				addOrUpdateEvent(logEvent, idToEventMap);
+				Logger.debug("Log \"" + logEvent.getId() + "-" + logEvent.getState() + "\" updated on map");
 			}
-			Logger.debug("Log " + logEvent.getId() + " " + logEvent.getState() + " updated on map");
+			allLogsReadFromFile = true;
+			Logger.info("All lines read and map updated");
+			br.close();
 		}
-		Logger.debug("All records read from the file");
-		allLogsReadFromFile = true;
-		br.close();
 	}
 
 	private static void setStartOrEndTimestamp(Event event, LogEvent logEvent) {
@@ -148,7 +124,7 @@ public class FileProcessor {
 		}
 	}
 
-	public static void processEvents(final Map<String, Event> idToEventMap) throws InterruptedException {
+	private static void processEvents(final Map<String, Event> idToEventMap) throws InterruptedException {
 
 		Set<String> ids = idToEventMap.keySet();
 		for (String id : ids) {
@@ -190,5 +166,34 @@ public class FileProcessor {
 		}
 		scanner.close();
 		return file;
+	}
+
+	private static LogEvent convertLogLineToEvent(String logLine) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		LogEvent logEvent = mapper.readValue(logLine, LogEvent.class);
+
+		return logEvent;
+
+	}
+
+	private static Map<String, Event> addOrUpdateEvent(LogEvent logEvent, Map<String, Event> idToEventMap) {
+		if (idToEventMap.containsKey(logEvent.getId())) {
+			Event event = idToEventMap.get(logEvent.getId());
+			setStartOrEndTimestamp(event, logEvent);
+			event.setDuration(event.getEndTimestamp() - event.getStartTimestamp());
+
+			idToEventMap.put(event.getId(), event);
+		} else {
+			Event event = new Event();
+			event.setId(logEvent.getId());
+
+			setStartOrEndTimestamp(event, logEvent);
+
+			event.setHost(logEvent.getHost());
+			event.setType(logEvent.getType());
+
+			idToEventMap.put(event.getId(), event);
+		}
+		return idToEventMap;
 	}
 }
