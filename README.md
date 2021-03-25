@@ -1,8 +1,10 @@
 What does this application do?
+------------------------------
 This application accepts the path to a log file , reads it, processes the data and saves it in HSQL database table EVENTS_TBL in the required format.  
 
 
-How to run
+How to run?
+------------------------------
 
 1. Ensure that Java is installed and path environment variable is set to /bin folder of jre
 2. Ensure that hsqldb-jdk8.jar is on the classpath
