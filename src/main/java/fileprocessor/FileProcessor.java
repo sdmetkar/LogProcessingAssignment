@@ -34,9 +34,9 @@ public class FileProcessor {
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
 
-		final File file = new File(
-				"C:\\Users\\sunny\\workspace\\fileprocessor\\src\\main\\java\\fileprocessor\\logfile.txt");
-		// promptUserForExistingFilePath();
+		//final File file = new File(
+				//"C:\\Users\\sunny\\workspace\\fileprocessor\\src\\main\\java\\fileprocessor\\logfile.txt");
+		final File file=promptUserForExistingFilePath();
 		FileInputStream fis = new FileInputStream(file);
 		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
 		final BufferedReader br = new BufferedReader(isr);
