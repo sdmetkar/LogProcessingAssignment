@@ -2,6 +2,7 @@ package fileprocessor;
 
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,7 +22,13 @@ public class EventUtilsTest {
 
 	@Test
 	public void testConvertLogLineToEvent() {
-		fail("Not yet implemented");
+		try {
+			LogEvent logEvent=EventUtils.convertLogLineToLogEvent("{\"id\":\"1\",\"timestamp\":21,\"state\":\"finished\",\"type\":\"APPLICATION_LOG\",\"host\":\"google1\"}");
+			assert(logEvent.getTimestamp()==21);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Test
