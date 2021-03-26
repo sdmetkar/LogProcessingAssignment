@@ -3,7 +3,7 @@ package pojo;
 public class LogEvent {
 	private String id;
 	private String state;
-	private int timestamp;
+	private long timestamp;
 	private String type;
 	private String host;
 	public String getId() {
@@ -18,10 +18,10 @@ public class LogEvent {
 	public void setState(String state) {
 		this.state = state;
 	}
-	public int getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
-	public void setTimestamp(int timestamp) {
+	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 	public String getType() {

@@ -1,10 +1,7 @@
 package dao;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +62,7 @@ public class EventsDao implements IGenericDao<Event> {
 
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + TABLE_NAME
-					+ " (id VARCHAR(25) NOT NULL, duration INTEGER NOT NULL,type VARCHAR(20),host VARCHAR(20),alert boolean,PRIMARY KEY (id));");
+					+ " (id VARCHAR(25) NOT NULL, duration LONG NOT NULL,type VARCHAR(20),host VARCHAR(20),alert boolean,PRIMARY KEY (id));");
 			//Logger.debug("Table created successfully "+count);
 			stmt.close();
 		} catch (Exception e) {

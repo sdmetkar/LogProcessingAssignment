@@ -2,12 +2,12 @@ package pojo;
 
 public class Event {
 	private String id;
-	private int duration=-1;
+	private long duration=-1;
 	private String type;
 	private String host;
 	private boolean alert;
-	private int startTimestamp;
-	private int endTimestamp;
+	private long startTimestamp;
+	private long endTimestamp;
 
 
 	public String getId() {
@@ -16,10 +16,10 @@ public class Event {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public int getDuration() {
+	public long getDuration() {
 		return duration;
 	}
-	public void setDuration(int duration) {
+	public void setDuration(long duration) {
 		this.duration = duration;
 	}
 	public String getType() {
@@ -41,16 +41,16 @@ public class Event {
 		this.alert = alert;
 	}
 	
-	public int getStartTimestamp() {
+	public long getStartTimestamp() {
 		return startTimestamp;
 	}
-	public void setStartTimestamp(int startTimestamp) {
+	public void setStartTimestamp(long startTimestamp) {
 		this.startTimestamp = startTimestamp;
 	}
-	public int getEndTimestamp() {
+	public long getEndTimestamp() {
 		return endTimestamp;
 	}
-	public void setEndTimestamp(int endTimestamp) {
+	public void setEndTimestamp(long endTimestamp) {
 		this.endTimestamp = endTimestamp;
 	}
 
