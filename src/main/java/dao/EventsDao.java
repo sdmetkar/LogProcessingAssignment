@@ -62,7 +62,7 @@ public class EventsDao implements IGenericDao<Event> {
 
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " + TABLE_NAME
-					+ " (id VARCHAR(25) NOT NULL, duration INTEGER NOT NULL,type VARCHAR(20),host VARCHAR(20),alert boolean,PRIMARY KEY (id));");
+					+ " (id VARCHAR(25) NOT NULL, duration BIGINT NOT NULL,type VARCHAR(20),host VARCHAR(20),alert boolean,PRIMARY KEY (id));");
 			//Logger.debug("Table created successfully "+count);
 			stmt.close();
 		} catch (Exception e) {
