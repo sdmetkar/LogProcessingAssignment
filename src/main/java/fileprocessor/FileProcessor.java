@@ -17,8 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import dao.DbConnection;
 import dao.EventsDao;
 import dao.IGenericDao;
@@ -35,9 +33,8 @@ public class FileProcessor {
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
 
-
-		final File file=promptUserForExistingFilePath();
-		//final File file = new File("C:\\Users\\sunny\\logfile.txt");
+		final File file = promptUserForExistingFilePath();
+		// final File file = new File("C:\\Users\\sunny\\logfile.txt");
 		FileInputStream fis = new FileInputStream(file);
 		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
 		final BufferedReader br = new BufferedReader(isr);
@@ -45,10 +42,10 @@ public class FileProcessor {
 		Connection connection = DbConnection.getInstance().getConnection();
 		eventsDao = new EventsDao(connection);
 		eventsDao.createTableIfNotExist();
-		
-		
-		//Producer Thread: loops through lines, if id of current line is not yet present on map, put it on the map
-		//otherwise update the existing object on map corresponding to the id
+
+		// Producer Thread: loops through lines, if id of current line is not
+		// yet present on map, put it on the map
+		// otherwise update the existing object on map corresponding to the id
 		Thread readLinesUpdateMapThread = new Thread(new Runnable() {
 
 			public void run() {
@@ -62,8 +59,9 @@ public class FileProcessor {
 		});
 		readLinesUpdateMapThread.start();
 
-		//Consumer Thread: loops through map entries, checks for objects for which duration is calculated , 
-		//save such objects to database and remove them from map
+		// Consumer Thread: loops through map entries, checks for objects for
+		// which duration is calculated ,
+		// save such objects to database and remove them from map
 		Thread readMapUpdateDatabaseThread = new Thread(new Runnable() {
 
 			public void run() {
@@ -106,44 +104,15 @@ public class FileProcessor {
 		if (br != null) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				//Thread.sleep(500);
-				LogEvent logEvent = convertLogLineToEvent(line);
-				addOrUpdateEvent(logEvent, idToEventMap);
+				// Thread.sleep(500);
+				LogEvent logEvent = EventUtils.convertLogLineToEvent(line);
+				EventUtils.addOrUpdateEvent(logEvent, idToEventMap);
 				Logger.debug("Log \"" + logEvent.getId() + "-" + logEvent.getState() + "\" updated on map");
 			}
 			allLogsReadFromFile = true;
 			Logger.info("All lines read and map updated");
 			br.close();
 		}
-	}
-
-	private static void setStartOrEndTimestamp(Event event, LogEvent logEvent) {
-		if (logEvent.getState().equalsIgnoreCase("STARTED")) {
-			event.setStartTimestamp(logEvent.getTimestamp());
-		} else {
-			event.setEndTimestamp(logEvent.getTimestamp());
-		}
-	}
-
-	private static void processEvents(final Map<String, Event> idToEventMap) throws InterruptedException {
-
-		Set<String> ids = idToEventMap.keySet();
-		for (String id : ids) {
-
-			Event event = idToEventMap.get(id);
-			if (event.getDuration() != -1) {
-				Logger.debug("Event ready to be logged to database: " + id);
-				if (event.getDuration() >= 4) {
-					Logger.warn("Event " + id + " " + "took more than 4 ms");
-					event.setAlert(true);
-				}
-
-				eventsDao.create(event);
-				idToEventMap.remove(id);
-				Logger.debug("Events currently on the map: " + idToEventMap.size());
-			}
-		}
-
 	}
 
 	private static File promptUserForExistingFilePath() {
@@ -169,33 +138,27 @@ public class FileProcessor {
 		return file;
 	}
 
-	private static LogEvent convertLogLineToEvent(String logLine) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		LogEvent logEvent = mapper.readValue(logLine, LogEvent.class);
+	private static void processEvents(final Map<String, Event> idToEventMap) throws InterruptedException {
 
-		return logEvent;
+		Set<String> ids = idToEventMap.keySet();
+		for (String id : ids) {
 
-	}
+			Event event = idToEventMap.get(id);
+			if (event.getDuration() != -1) {
+				Logger.debug("Event ready to be logged to database: " + id);
+				if (event.getDuration() >= 4) {
+					Logger.warn("Event " + id + " " + "took more than 4 ms");
+					event.setAlert(true);
+				}
 
-	
-	private static Map<String, Event> addOrUpdateEvent(LogEvent logEvent, Map<String, Event> idToEventMap) {
-		if (idToEventMap.containsKey(logEvent.getId())) {
-			Event event = idToEventMap.get(logEvent.getId());
-			setStartOrEndTimestamp(event, logEvent);
-			event.setDuration(event.getEndTimestamp() - event.getStartTimestamp());
-
-			idToEventMap.put(event.getId(), event);
-		} else {
-			Event event = new Event();
-			event.setId(logEvent.getId());
-
-			setStartOrEndTimestamp(event, logEvent);
-
-			event.setHost(logEvent.getHost());
-			event.setType(logEvent.getType());
-
-			idToEventMap.put(event.getId(), event);
+				eventsDao.create(event);
+				idToEventMap.remove(id);
+				Logger.debug("Events currently on the map: " + idToEventMap.size());
+			}
 		}
-		return idToEventMap;
+
 	}
+
+
+
 }
