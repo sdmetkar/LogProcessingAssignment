@@ -38,7 +38,7 @@ public class EventUtils {
 	
 
 	
-	static LogEvent convertLogLineToEvent(String logLine) throws IOException {
+	static LogEvent convertLogLineToLogEvent(String logLine) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		LogEvent logEvent = mapper.readValue(logLine, LogEvent.class);
 

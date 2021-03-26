@@ -105,7 +105,7 @@ public class FileProcessor {
 			String line;
 			while ((line = br.readLine()) != null) {
 				// Thread.sleep(500);
-				LogEvent logEvent = EventUtils.convertLogLineToEvent(line);
+				LogEvent logEvent = EventUtils.convertLogLineToLogEvent(line);
 				EventUtils.addOrUpdateEvent(logEvent, idToEventMap);
 				Logger.debug("Log \"" + logEvent.getId() + "-" + logEvent.getState() + "\" updated on map");
 			}
