@@ -33,7 +33,10 @@ public class EventUtilsTest {
 
 	@Test
 	public void testSetStartOrEndTimestamp() {
-		fail("Not yet implemented");
+		Event event=getTestEvent();
+		LogEvent logEvent=getTestLogEvent();
+		EventUtils.setStartOrEndTimestamp(event, logEvent);
+		assert(event.getEndTimestamp()==5);
 	}
 
 	private Event getTestEvent(){
@@ -48,7 +51,7 @@ public class EventUtilsTest {
 	private LogEvent getTestLogEvent(){
 		LogEvent logEvent=new LogEvent();
 		logEvent.setId("sun");
-		logEvent.setState("started");
+		logEvent.setState("finished");
 		logEvent.setTimestamp(5);
 		logEvent.setHost("fads");
 		logEvent.setType("application_log");
