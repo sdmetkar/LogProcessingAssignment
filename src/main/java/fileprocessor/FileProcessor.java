@@ -29,7 +29,6 @@ public class FileProcessor {
 	private static Map<String, Event> idToEventMap = new ConcurrentHashMap<String, Event>();
 	private static boolean allLogsReadFromFile = false;
 	private static IGenericDao<Event> eventsDao;
-	// private static File file;
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
 
