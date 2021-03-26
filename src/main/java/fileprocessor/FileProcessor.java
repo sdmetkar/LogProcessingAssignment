@@ -23,6 +23,13 @@ import dao.IGenericDao;
 import pojo.Event;
 import pojo.LogEvent;
 
+/**
+ * @author Sunny Metkar
+ *
+ * This application accepts the path to a log file containing json string on each line , reads data , processes it and 
+ * saves on HSQL database table EVENTS_TBL. 
+ */
+
 public class FileProcessor {
 	private static final Logger Logger = LoggerFactory.getLogger(FileProcessor.class);
 
@@ -98,6 +105,16 @@ public class FileProcessor {
 
 	}
 
+	
+	/**
+	 * Read lines from bufferedreader one by one, convert line to object and 
+	 * save those in a map against the id
+	 * 
+	 * @param br
+	 * @param idToEventMap
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	private static void readLinesUpdateMap(BufferedReader br, Map<String, Event> idToEventMap)
 			throws IOException, InterruptedException {
 		if (br != null) {
@@ -114,6 +131,10 @@ public class FileProcessor {
 		}
 	}
 
+	
+	/**
+	 * @return File object pointing to the path provided by the user on standard input
+	 */
 	private static File promptUserForExistingFilePath() {
 		File file = null;
 		Scanner scanner = new Scanner(System.in);

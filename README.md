@@ -1,6 +1,6 @@
 What does this application do?
 ------------------------------
-This application accepts the path to a log file , reads it, processes the data and saves it in HSQL database table EVENTS_TBL in the required format.  
+This application accepts the path to a log file containing json string on each line , reads data , processes it and saves on HSQL database table EVENTS_TBL .
 
 
 How to run?
