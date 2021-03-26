@@ -23,7 +23,8 @@ public class EventsDao implements IGenericDao<Event> {
 
 
 
-	public void create(Event event) {
+	public int create(Event event) {
+		int result=0;
 		try {
 
 			Statement stmt = connection.createStatement();
@@ -32,13 +33,14 @@ public class EventsDao implements IGenericDao<Event> {
 					+ "," + event.isAlert() + ");";
 			Logger.debug("Query " + query);
 
-			stmt.executeUpdate(query);
+			result=stmt.executeUpdate(query);
 			stmt.close();
 			Logger.info("Event " + event.getId() + " saved to db successfully ");
 		} catch (Exception e) {
 			Logger.error(e.getMessage());
 			e.printStackTrace();
 		}
+		return result;
 
 	}
 

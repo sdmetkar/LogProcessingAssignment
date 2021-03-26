@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dao.DbConnection;
 import dao.EventsDao;
+import dao.IGenericDao;
 import pojo.Event;
 import pojo.LogEvent;
 
@@ -29,7 +30,7 @@ public class FileProcessor {
 
 	private static Map<String, Event> idToEventMap = new ConcurrentHashMap<String, Event>();
 	private static boolean allLogsReadFromFile = false;
-	private static EventsDao eventsDao;
+	private static IGenericDao<Event> eventsDao;
 	// private static File file;
 
 	public static void main(String[] args) throws SQLException, FileNotFoundException {
@@ -176,6 +177,7 @@ public class FileProcessor {
 
 	}
 
+	
 	private static Map<String, Event> addOrUpdateEvent(LogEvent logEvent, Map<String, Event> idToEventMap) {
 		if (idToEventMap.containsKey(logEvent.getId())) {
 			Event event = idToEventMap.get(logEvent.getId());
